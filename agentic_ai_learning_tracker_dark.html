@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agentic AI Learning Tracker</title>
+  <style>
+    /* ── Dark theme tokens ── */
+    :root {
+      --bg-primary:    #0f1117;
+      --bg-secondary:  #1a1d27;
+      --bg-tertiary:   #22263a;
+      --border-dim:    #2a2e42;
+      --border-mid:    #343856;
+      --text-primary:  #e8eaf0;
+      --text-secondary:#8b90a8;
+      --text-tertiary: #555a75;
+      --accent:        #1D9E75;
+      --accent-dim:    #133d2e;
+      --radius-md:     8px;
+      --radius-lg:     12px;
+
+      /* badge colours */
+      --done-bg:   #0d3327; --done-fg:   #3ecf9e;
+      --active-bg: #0d2240; --active-fg: #5aafff;
+      --new-bg:    #2e1f08; --new-fg:    #f0a830;
+      --lock-bg:   #1a1d27; --lock-fg:   #555a75;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+    }
+
+    /* scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg-primary); }
+    ::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 99px; }
+
+    /* ── Layout ── */
+    .page { padding: 1.5rem 1rem 3rem; max-width: 680px; margin: 0 auto; }
+
+    /* ── Header ── */
+    .header-title  { font-size: 20px; font-weight: 600; color: var(--text-primary); }
+    .header-sub    { font-size: 13px; color: var(--text-secondary); margin-top: 3px; }
+    .header-pct    { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+
+    /* ── Progress bar ── */
+    .progress-bar-wrap {
+      background: var(--bg-tertiary);
+      border-radius: 99px;
+      height: 8px;
+      margin-top: 10px;
+      overflow: hidden;
+      flex: 1;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: var(--accent);
+      transition: width 0.4s ease;
+    }
+
+    /* ── Stats ── */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 1rem 0 1.5rem;
+    }
+    .stat {
+      background: var(--bg-secondary);
+      border: 0.5px solid var(--border-dim);
+      border-radius: var(--radius-md);
+      padding: 14px 12px;
+      text-align: center;
+    }
+    .stat-num   { font-size: 22px; font-weight: 600; color: var(--text-primary); }
+    .stat-label { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+
+    /* ── Section label ── */
+    .section-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin: 1.2rem 0 6px;
+      padding-left: 2px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    /* ── Phase card ── */
+    .phase {
+      border: 0.5px solid var(--border-dim);
+      border-radius: var(--radius-lg);
+      margin-bottom: 8px;
+      overflow: hidden;
+      background: var(--bg-secondary);
+      transition: border-color 0.2s;
+    }
+    .phase:hover { border-color: var(--border-mid); }
+
+    .phase-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 14px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .phase-header:hover { background: var(--bg-tertiary); }
+
+    .phase-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+      flex: 1;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .phase-body {
+      padding: 0 14px 12px;
+      border-top: 0.5px solid var(--border-dim);
+    }
+
+    /* ── Task group ── */
+    .task-group { margin-top: 10px; }
+    .task-group-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 5px;
+    }
+
+    /* ── Task row ── */
+    .task {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 6px 0;
+      border-bottom: 0.5px solid var(--border-dim);
+      cursor: pointer;
+      transition: background 0.1s;
+      border-radius: 4px;
+    }
+    .task:last-child { border-bottom: none; }
+    .task:hover { background: rgba(255,255,255,0.03); }
+
+    /* checkbox */
+    .task-check {
+      width: 15px;
+      height: 15px;
+      border-radius: 4px;
+      border: 1.5px solid var(--border-mid);
+      flex-shrink: 0;
+      margin-top: 1px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+      background: var(--bg-primary);
+    }
+    .task-check.done {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    .task-check.done::after {
+      content: '';
+      display: block;
+      width: 4px;
+      height: 7px;
+      border: 1.5px solid #fff;
+      border-top: none;
+      border-left: none;
+      transform: rotate(45deg) translateY(-1px);
+    }
+
+    .task-text {
+      font-size: 13px;
+      color: var(--text-primary);
+      line-height: 1.45;
+      flex: 1;
+    }
+    .task-text.done {
+      text-decoration: line-through;
+      color: var(--text-tertiary);
+    }
+
+    /* ── Mini progress bar ── */
+    .mini-bar {
+      height: 3px;
+      background: var(--bg-tertiary);
+      width: 48px;
+      border-radius: 99px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .mini-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: var(--accent);
+    }
+
+    /* ── Meta count ── */
+    .meta {
+      font-size: 11px;
+      color: var(--text-secondary);
+      min-width: 30px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    /* ── Week tag ── */
+    .week-tag {
+      font-size: 10px;
+      color: var(--text-tertiary);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* ── Chevron ── */
+    .chev { font-size: 10px; color: var(--text-tertiary); flex-shrink: 0; }
+
+    /* ── Status badges ── */
+    .sbadge {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 99px;
+      font-weight: 600;
+      flex-shrink: 0;
+      letter-spacing: 0.02em;
+    }
+    .s-done   { background: var(--done-bg);   color: var(--done-fg); }
+    .s-active { background: var(--active-bg); color: var(--active-fg); }
+    .s-new    { background: var(--new-bg);    color: var(--new-fg); }
+    .s-locked { background: var(--lock-bg);   color: var(--lock-fg); }
+
+    /* ── sr-only ── */
+    .sr-only {
+      position: absolute; width: 1px; height: 1px;
+      padding: 0; margin: -1px; overflow: hidden;
+      clip: rect(0,0,0,0); white-space: nowrap; border-width: 0;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+  <h2 class="sr-only">Agentic AI learning roadmap tracker — full 19-week curriculum</h2>
+
+  <div style="margin-bottom:1rem">
+    <div class="header-title">Agentic AI roadmap</div>
+    <div class="header-sub">Full 19-week curriculum — demo to production</div>
+    <div style="display:flex;align-items:center;gap:10px;margin-top:10px">
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" id="main-bar" style="width:0%"></div></div>
+      <span class="header-pct" id="main-pct">0%</span>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-num" id="s-done">0</div><div class="stat-label">done</div></div>
+    <div class="stat"><div class="stat-num" id="s-left">0</div><div class="stat-label">remaining</div></div>
+    <div class="stat"><div class="stat-num" id="s-phase">0</div><div class="stat-label">phases done</div></div>
+  </div>
+
+  <div id="phases-container"></div>
+</div>
+
+<script>
+const SKEY = 'agentic_roadmap_v2';
+const phases = [
+  {id:'p0',title:'Foundation — already built',week:'Done',status:'done',groups:[
+    {label:'Completed',tasks:[
+      {id:'f1',text:'LLM types, API use, local LLM, tokens, prompts'},
+      {id:'f2',text:'HTTP APIs using requests lib — POST with JSON body'},
+      {id:'f3',text:'Basic tool use — create tool, let LLM decide'},
+      {id:'f4',text:'Basic memory — JSON file, last 5 conversations'},
+      {id:'f5',text:'Working agent with conversation + tools + memory'},
+    ]}
+  ]},
+  {id:'p1',title:'Reasoning engine — ReAct loop',week:'Wk 1–2',status:'active',groups:[
+    {label:'Concepts',tasks:[
+      {id:'p1c1',text:'ReAct loop — Reason + Act mental model'},
+      {id:'p1c2',text:'Chain vs loop — fixed steps vs dynamic self-correction'},
+      {id:'p1c3',text:'Token budgeting inside the loop'},
+      {id:'p1c4',text:'Handling infinite loops and stopping conditions'},
+    ]},
+    {label:'Build',tasks:[
+      {id:'p1t1',text:'Convert agent to loop: Thought → Action → Observation → Repeat'},
+      {id:'p1t2',text:'Print/log each reasoning step visibly'},
+      {id:'p1t3',text:'Add max_steps limit and graceful exit'},
+      {id:'p1t4',text:'Mini project: multi-step task (math + API + reasoning)'},
+    ]}
+  ]},
+  {id:'p2',title:'Structured output & control',week:'Wk 3',status:'locked',groups:[
+    {label:'Concepts',tasks:[
+      {id:'p2c1',text:'JSON structured outputs from LLM'},
+      {id:'p2c2',text:'Schema validation (Pydantic)'},
+      {id:'p2c3',text:'Tool calling protocols'},
+    ]},
+    {label:'Build',tasks:[
+      {id:'p2t1',text:'Enforce strict JSON from LLM with schema'},
+      {id:'p2t2',text:'Add parser + validation layer'},
+      {id:'p2t3',text:'Implement retry on invalid output'},
+      {id:'p2t4',text:'Mini project: tool router agent with strict schema'},
+    ]}
+  ]},
+  {id:'p3',title:'Memory systems (deep)',week:'Wk 4–5',status:'locked',groups:[
+    {label:'Concepts',tasks:[
+      {id:'p3c1',text:'4 memory types: working, episodic, semantic, procedural'},
+      {id:'p3c2',text:'Embeddings & similarity search'},
+      {id:'p3c3',text:'Chunking strategies'},
+      {id:'p3c4',text:'Memory summarization when context window fills'},
+    ]},
+    {label:'Build',tasks:[
+      {id:'p3t1',text:'Store conversations as embeddings (FAISS/Chroma)'},
+      {id:'p3t2',text:'Retrieve relevant past memory by similarity'},
+      {id:'p3t3',text:'Inject retrieved memory into prompt dynamically'},
+      {id:'p3t4',text:'Add summarization for long contexts'},
+      {id:'p3t5',text:'Mini project: context-aware assistant with semantic memory'},
+    ]}
+  ]},
+  {id:'p4',title:'Planning agents',week:'Wk 6–7',status:'locked',groups:[
+    {label:'Concepts',tasks:[
+      {id:'p4c1',text:'Task decomposition'},
+      {id:'p4c2',text:'Planner vs executor separation'},
+      {id:'p4c3',text:'Tree-of-Thoughts'},
+      {id:'p4c4',text:'Hierarchical planning'},
+      {id:'p4c5',text:'Replanning when a step fails mid-execution'},
+    ]},
+    {label:'Build',tasks:[
+      {id:'p4t1',text:'Build planner module (creates steps from goal)'},
+      {id:'p4t2',text:'Build executor module (runs each step)'},
+      {id:'p4t3',text:'Add replan logic on failure'},
+      {id:'p4t4',text:'Mini project: agent that solves tasks step-by-step'},
+    ]}
+  ]},
+  {id:'p5',title:'Tooling system design',week:'Wk 8',status:'locked',groups:[
+    {label:'Concepts',tasks:[
+      {id:'p5c1',text:'Tool abstraction and metadata'},
+      {id:'p5c2',text:'Capability-based dynamic tool selection'},
+    ]},
+    {label:'Build',tasks:[
+      {id:'p5t1',text:'Create tool registry with descriptions'},
+      {id:'p5t2',text:'Let LLM choose tool dynamically from registry'},
+      {id:'p5t3',text:'Mini project: multi-tool intelligent agent'},
+    ]}
+  ]},
+  {id:'p6',title:'Reliability & guardrails',week:'Wk 9',status:'locked',groups:[
+    {label:'Concepts',tasks:[
+      {id:'p6c1',text:'Hallucination detection patterns'},
+      {id:'p6c2',text:'Error handling and fallback strategies'},
+    ]},
+    {label:'Build',tasks:[
+      {id:'p6t1',text:'Add retry logic'},
+      {id:'p6t2',text:'Add fallback responses'},
+      {id:'p6t3',text:'Detect and handle invalid tool usage'},
+      {id:'p6t4',text:'Mini project: fault-tolerant agent'},
+    ]}
+  ]},
+  {id:'p6b',title:'Observability & debugging',week:'Wk 9–10',status:'locked',groups:[
+    {label:'Concepts',tasks:[
+      {id:'ob1',text:'Why agents are hard to debug without tracing'},
+      {id:'ob2',text:'What to log: thoughts, tool calls, tokens, latency'},
+    ]},
+    {label:'Build',tasks:[
+      {id:'ob3',text:'Add structured logging to every agent step'},
+      {id:'ob4',text:'Build a simple trace viewer (print or file)'},
+      {id:'ob5',text:'Explore LangSmith or equivalent tracing tool'},
+    ]}
+  ]},
+  {id:'p7',title:'RAG deep dive',week:'Wk 10–11',status:'locked',groups:[
+    {label:'Concepts',tasks:[
+      {id:'p7c1',text:'Embeddings in depth'},
+      {id:'p7c2',text:'Reranking'},
+      {id:'p7c3',text:'Hybrid search (dense + sparse)'},
+    ]},
+    {label:'Build',tasks:[
+      {id:'p7t1',text:'Full pipeline: chunk → embed → store → retrieve'},
+      {id:'p7t2',text:'Improve retrieval quality with reranking'},
+      {id:'p7t3',text:'Mini project: knowledge-based QA system'},
+    ]}
+  ]},
+  {id:'p8',title:'Multi-agent systems',week:'Wk 12',status:'locked',groups:[
+    {label:'Concepts',tasks:[
+      {id:'p8c1',text:'Role-based agents'},
+      {id:'p8c2',text:'Communication protocols between agents'},
+    ]},
+    {label:'Build',tasks:[
+      {id:'p8t1',text:'Create planner agent + worker agent'},
+      {id:'p8t2',text:'Implement message passing between agents'},
+      {id:'p8t3',text:'Mini project: multi-agent task solver'},
+    ]}
+  ]},
+  {id:'p9',title:'Frameworks',week:'Wk 13',status:'locked',groups:[
+    {label:'Concepts',tasks:[
+      {id:'p9c1',text:'LangChain basics — how it solves the same problems'},
+      {id:'p9c2',text:'LlamaIndex basics'},
+      {id:'p9c3',text:'AutoGen basics'},
+    ]},
+    {label:'Build',tasks:[
+      {id:'p9t1',text:'Rebuild one earlier project using a framework'},
+      {id:'p9t2',text:'Compare: your custom code vs framework approach'},
+    ]}
+  ]},
+  {id:'p10',title:'Evaluation & state',week:'Wk 14',status:'locked',groups:[
+    {label:'Concepts',tasks:[
+      {id:'p10c1',text:'Agent evaluation methodology'},
+      {id:'p10c2',text:'Metrics: success rate, accuracy, latency'},
+      {id:'p10c3',text:'State persistence across sessions'},
+    ]},
+    {label:'Build',tasks:[
+      {id:'p10t1',text:'Create test cases for your agent'},
+      {id:'p10t2',text:'Log and measure agent performance'},
+      {id:'p10t3',text:'Store user sessions in a DB'},
+    ]}
+  ]},
+  {id:'p11',title:'Model control & tuning',week:'Wk 15',status:'new',groups:[
+    {label:'Concepts',tasks:[
+      {id:'p11c1',text:'Temperature, Top-p, Frequency penalty — what each does'},
+      {id:'p11c2',text:'Determinism vs creativity tradeoff'},
+      {id:'p11c3',text:'Prompt tuning vs parameter tuning'},
+      {id:'p11c4',text:'Token limits and cost optimization'},
+    ]},
+    {label:'Build',tasks:[
+      {id:'p11t1',text:'Experiment: temperature 0 vs 0.7 vs 1 — same prompt'},
+      {id:'p11t2',text:'Compare outputs: reasoning tasks vs creative tasks'},
+      {id:'p11t3',text:'Build config system: different settings per task type'},
+      {id:'p11t4',text:'Mini project: factual agent (low temp) vs creative agent (high temp)'},
+    ]}
+  ]},
+  {id:'p12',title:'Fine-tuning & custom models',week:'Wk 16',status:'new',groups:[
+    {label:'Concepts',tasks:[
+      {id:'p12c1',text:'When to fine-tune vs prompt — decision framework'},
+      {id:'p12c2',text:'Instruction tuning'},
+      {id:'p12c3',text:'Dataset creation and cleaning'},
+      {id:'p12c4',text:'Overfitting risks and how to detect them'},
+      {id:'p12c5',text:'Reality check: most agent systems = better with prompting + RAG'},
+    ]},
+    {label:'Build',tasks:[
+      {id:'p12t1',text:'Prepare dataset (input-output pairs)'},
+      {id:'p12t2',text:'Run a small fine-tuning experiment'},
+      {id:'p12t3',text:'Evaluate fine-tuned vs base model — compare quality'},
+    ]}
+  ]},
+  {id:'p13',title:'Accuracy & evaluation engineering',week:'Wk 17',status:'new',groups:[
+    {label:'Concepts',tasks:[
+      {id:'p13c1',text:'Accuracy vs hallucination — measuring the difference'},
+      {id:'p13c2',text:'Grounding via RAG'},
+      {id:'p13c3',text:'Evaluation datasets — how to build them'},
+      {id:'p13c4',text:'Latency vs quality tradeoff'},
+    ]},
+    {label:'Build',tasks:[
+      {id:'p13t1',text:'Create benchmark prompts for your agent'},
+      {id:'p13t2',text:'Measure correctness and tool success rate'},
+      {id:'p13t3',text:'Add scoring system'},
+      {id:'p13t4',text:'Mini project: agent evaluation dashboard (basic logs)'},
+    ]}
+  ]},
+  {id:'p14',title:'Deployment & scaling',week:'Wk 18',status:'new',groups:[
+    {label:'Concepts',tasks:[
+      {id:'p14c1',text:'API deployment patterns'},
+      {id:'p14c2',text:'Async processing'},
+      {id:'p14c3',text:'Rate limiting'},
+      {id:'p14c4',text:'Cost monitoring in production'},
+    ]},
+    {label:'Build',tasks:[
+      {id:'p14t1',text:'Wrap agent into a FastAPI service'},
+      {id:'p14t2',text:'Add request logging'},
+      {id:'p14t3',text:'Handle multiple concurrent requests'},
+      {id:'p14t4',text:'Mini project: deploy agent API locally or to cloud'},
+    ]}
+  ]},
+  {id:'p15',title:'Multi-user & state management',week:'Wk 19',status:'new',groups:[
+    {label:'Concepts',tasks:[
+      {id:'p15c1',text:'User sessions and isolation'},
+      {id:'p15c2',text:'Per-user memory architecture'},
+      {id:'p15c3',text:'Authentication basics'},
+      {id:'p15c4',text:'Data isolation between users'},
+    ]},
+    {label:'Build',tasks:[
+      {id:'p15t1',text:'Add user_id to system'},
+      {id:'p15t2',text:'Store separate memory per user'},
+      {id:'p15t3',text:'Implement session handling'},
+      {id:'p15t4',text:'Mini project: multi-user agent system'},
+    ]}
+  ]},
+  {id:'pfinal',title:'Final project — autonomous research agent',week:'Wk 15–19',status:'new',groups:[
+    {label:'Features to build',tasks:[
+      {id:'fn1',text:'Takes user query and creates a plan'},
+      {id:'fn2',text:'Uses tools (web search, code execution, etc.)'},
+      {id:'fn3',text:'Stores and retrieves memory (vector DB)'},
+      {id:'fn4',text:'Refines answers over multiple steps'},
+      {id:'fn5',text:'Outputs structured report'},
+      {id:'fn6',text:'Full tracing and observability built in'},
+      {id:'fn7',text:'Handles failures and retries gracefully'},
+      {id:'fn8',text:'Deployed as an API with multi-user support'},
+    ]}
+  ]},
+];
+
+let checked = {};
+
+function lsGet(k) { try { return JSON.parse(localStorage.getItem(k)); } catch(e) { return null; } }
+function lsSet(k,v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e) {} }
+
+function load() {
+  checked = lsGet(SKEY) || {};
+  // seed foundation tasks as done
+  ['f1','f2','f3','f4','f5'].forEach(id => { if (checked[id] === undefined) checked[id] = true; });
+  render();
+  updateStats();
+}
+
+function save() { lsSet(SKEY, checked); }
+
+function toggle(id) {
+  checked[id] = !checked[id];
+  save();
+  const el = document.querySelector(`[data-id="${id}"]`);
+  if (!el) return;
+  el.querySelector('.task-check').classList.toggle('done', checked[id]);
+  el.querySelector('.task-text').classList.toggle('done', checked[id]);
+  refreshPhaseBar(el.closest('.phase'));
+  updateStats();
+}
+
+function refreshPhaseBar(phEl) {
+  if (!phEl) return;
+  const total = phEl.querySelectorAll('.task').length;
+  const done  = phEl.querySelectorAll('.task-check.done').length;
+  const f = phEl.querySelector('.mini-fill');
+  const m = phEl.querySelector('.meta');
+  if (f) f.style.width = (total ? Math.round(done / total * 100) : 0) + '%';
+  if (m) m.textContent = done + '/' + total;
+}
+
+function updateStats() {
+  let total = 0, done = 0, phDone = 0;
+  phases.forEach(ph => {
+    let pt = 0, pd = 0;
+    ph.groups.forEach(g => g.tasks.forEach(t => { total++; pt++; if (checked[t.id]) { done++; pd++; } }));
+    if (pt && pd === pt) phDone++;
+  });
+  const pct = total ? Math.round(done / total * 100) : 0;
+  document.getElementById('main-bar').style.width = pct + '%';
+  document.getElementById('main-pct').textContent  = pct + '%';
+  document.getElementById('s-done').textContent    = done;
+  document.getElementById('s-left').textContent    = total - done;
+  document.getElementById('s-phase').textContent   = phDone;
+}
+
+function togglePhase(id) {
+  const b = document.getElementById('body-' + id);
+  const c = document.getElementById('chev-' + id);
+  if (!b) return;
+  const open = b.style.display !== 'none';
+  b.style.display = open ? 'none' : 'block';
+  c.textContent   = open ? '▼' : '▲';
+}
+
+function badgeHtml(status) {
+  if (status === 'done')   return '<span class="sbadge s-done">completed</span>';
+  if (status === 'active') return '<span class="sbadge s-active">in progress</span>';
+  if (status === 'new')    return '<span class="sbadge s-new">new</span>';
+  return '<span class="sbadge s-locked">upcoming</span>';
+}
+
+function render() {
+  const c = document.getElementById('phases-container');
+  c.innerHTML = '';
+
+  const sections = {
+    p0:     'Core system (weeks 1–14)',
+    p11:    'Advanced mastery (weeks 15–19)',
+    pfinal: 'Final project'
+  };
+
+  phases.forEach(ph => {
+    if (sections[ph.id]) {
+      const lbl = document.createElement('div');
+      lbl.className   = 'section-label';
+      lbl.textContent = sections[ph.id];
+      c.appendChild(lbl);
+    }
+
+    const allTasks = ph.groups.flatMap(g => g.tasks);
+    const total    = allTasks.length;
+    const done     = allTasks.filter(t => checked[t.id]).length;
+    const isOpen   = ph.status === 'done' || ph.status === 'active';
+
+    const phEl = document.createElement('div');
+    phEl.className = 'phase';
+    phEl.id = ph.id;
+
+    const groupsHtml = ph.groups.map(g => `
+      <div class="task-group">
+        <div class="task-group-label">${g.label}</div>
+        ${g.tasks.map(t => `
+          <div class="task" data-id="${t.id}" onclick="toggle('${t.id}')">
+            <div class="task-check ${checked[t.id] ? 'done' : ''}"></div>
+            <span class="task-text ${checked[t.id] ? 'done' : ''}">${t.text}</span>
+          </div>`).join('')}
+      </div>`).join('');
+
+    phEl.innerHTML = `
+      <div class="phase-header" onclick="togglePhase('${ph.id}')">
+        ${badgeHtml(ph.status)}
+        <span class="phase-title">${ph.title}</span>
+        <span class="week-tag">${ph.week}</span>
+        <div class="mini-bar"><div class="mini-fill" style="width:${total ? Math.round(done / total * 100) : 0}%"></div></div>
+        <span class="meta">${done}/${total}</span>
+        <span class="chev" id="chev-${ph.id}">${isOpen ? '▲' : '▼'}</span>
+      </div>
+      <div class="phase-body" id="body-${ph.id}" style="display:${isOpen ? 'block' : 'none'}">${groupsHtml}</div>`;
+
+    c.appendChild(phEl);
+  });
+}
+
+load();
+</script>
+</body>
+</html>
