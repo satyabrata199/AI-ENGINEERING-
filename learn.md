@@ -1,3 +1,6 @@
+https://colab.research.google.com/github/pyannote/pyannote-audio/blob/develop/tutorials/training_a_model.ipynb/
+
+
 You’re in a much stronger position than you think.
 
 Most 2025 grads from tier-3 colleges are still stuck in:
