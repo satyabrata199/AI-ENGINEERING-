@@ -302,3 +302,93 @@ dp[i] = best answer till i
 
 Start with **Problem #1: Find Largest Element in Array**, then move sequentially. This ordering is designed so that by problem 100 you'll have covered almost every pattern commonly asked in service-based company interviews.
 
+
+For most **service-based companies** (TCS, Infosys, Wipro, Cognizant, Accenture, Capgemini, HCL, Tech Mahindra, etc.), the interview focus is usually different from top product companies.
+
+### High Priority (Very Frequently Asked)
+
+1. **Arrays** ⭐⭐⭐⭐⭐
+2. **Strings & Hashing** ⭐⭐⭐⭐⭐
+3. **Two Pointers** ⭐⭐⭐⭐
+4. **Sliding Window** ⭐⭐⭐⭐
+5. **Binary Search** ⭐⭐⭐⭐
+6. **Linked List** ⭐⭐⭐⭐
+7. **Stack** ⭐⭐⭐⭐
+8. **Queue** ⭐⭐⭐
+
+These topics alone cover a large portion of coding rounds.
+
+### Medium Priority
+
+9. **Trees (Basic Traversals, BST)** ⭐⭐⭐
+10. **Heap / Priority Queue** ⭐⭐⭐
+11. **Graph (BFS, DFS basics)** ⭐⭐
+
+Usually they ask easier graph/tree problems compared to product companies.
+
+### Lower Priority (But Still Possible)
+
+12. **Backtracking** ⭐⭐
+13. **Dynamic Programming (DP)** ⭐⭐
+
+DP is asked much less frequently in service-based companies. If asked, it is usually simple:
+
+* Fibonacci
+* Climbing Stairs
+* Coin Change (easy variations)
+* Longest Common Subsequence (sometimes)
+
+---
+
+### If You Have Only 1 Month
+
+Focus in this order:
+
+1. Arrays
+2. Strings + Hashing
+3. Two Pointers
+4. Sliding Window
+5. Binary Search
+6. Linked List
+7. Stack
+8. Queue
+9. Trees
+10. Graph (BFS/DFS)
+11. Heap
+12. Backtracking
+13. DP
+
+---
+
+### Approximate Weightage
+
+If your target is **TCS NQT, Infosys, Wipro, Cognizant, Accenture, Capgemini, or HCL**, I would recommend solving:
+
+* 30–40 Array/String problems
+* 15–20 Linked List/Stack/Queue problems
+* 10–15 Tree/Graph problems
+* 5–10 DP problems
+
+That is usually enough to clear the coding rounds of most service-based companies.
+
+
+Typical DSA importance in service-based company interviews
+
+Relative frequency and importance of topics.
+
+topic	importance
+Arrays	10
+Hashing	9
+Two Pointers	8
+Sliding Window	8
+Binary Search	7
+Linked List	7
+Stack	6
+Queue	5
+Trees	5
+Heap	4
+Graph	4
+Backtracking	3
+DP	2
+
+
