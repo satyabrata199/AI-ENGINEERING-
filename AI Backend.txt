@@ -1,0 +1,12 @@
+AI Backend 
+
+How the Internet works (IP, DNS, routers, packets)
+TCP vs UDP and why HTTP uses TCP
+HTTP in depth (methods, headers, status codes, cookies)
+HTTPS and TLS (encryption, certificates, handshakes)
+REST APIs and API design
+ASGI, Uvicorn, and FastAPI internals
+Authentication (sessions, JWT, OAuth)
+Reverse proxies and Nginx
+Databases, connection pooling, and ORMs
+Scaling (load balancers, caching, queues, microservices)
